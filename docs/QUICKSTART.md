@@ -157,6 +157,87 @@ phantom generate docs/examples/hello.py --intent "note the program start" \
 
 This sends the file to the configured provider (needs `pip install "phantom-lang[llm]"` and `GEMINI_API_KEY`). See [GENERATOR.md](GENERATOR.md).
 
+## 10. Locking things down
+You can restrict runtime capabilities using `--deny` or limit allowed handler directories using `--handlers-from`.
+
+### Blocking Capabilities
+Use `--deny` to block specific capabilities, such as `cap.counters`:
+
+```bash
+phantom inspect docs/examples/policy.py --deny cap.counters
+```
+
+Output:
+```text
+File: docs/examples/policy.py
+Spec Version: 0.1.0
+Total Instructions: 3
+
+Instructions:
+  [1] counter.create
+      Arguments:    string='cap.counters', integer=10
+      Source:       docs/examples/policy.py:10:0
+      Encoding:     comment
+      Capabilities: cap.counters
+      Policy:       BLOCKED (denied: cap.counters)
+  [2] counter.increment
+      Arguments:    string='cap.counters'
+      Source:       docs/examples/policy.py:11:0
+      Encoding:     comment
+      Capabilities: cap.counters
+      Policy:       BLOCKED (denied: cap.counters)
+  [3] event.on
+      Arguments:    string='phantom.pre_execute', string='hooks.on_start'
+      Source:       docs/examples/policy.py:12:0
+      Encoding:     comment
+      Capabilities: cap.events
+```
+
+Attempting to execute the file with denied capabilities will halt execution before the host starts (exit code 2):
+
+```bash
+phantom run docs/examples/policy.py --deny cap.counters
+```
+
+Output:
+```text
+=== Phantom Runtime v0.1.1 ===
+[ERROR] docs/examples/policy.py:10:0 [comment]: Instruction 'counter.create' requires cap.counters, which the capability policy denies
+[ERROR] docs/examples/policy.py:11:0 [comment]: Instruction 'counter.increment' requires cap.counters, which the capability policy denies
+Validation failed: 2 error(s), 0 warning(s)
+```
+
+### Restricting Event Handlers
+Use `--handlers-from` to restrict where handler modules can be imported from:
+
+```bash
+phantom run docs/examples/policy.py --handlers-from docs/examples
+```
+
+Output:
+```text
+=== Phantom Runtime v0.1.1 ===
+[OK] Validation passed (3 instruction(s), 0 warning(s))
+[hook] starting docs/examples/policy.py
+Running host program under policy rules.
+```
+
+If the handler module resides outside the specified directory, the runtime rejects the import:
+
+```bash
+phantom run docs/examples/policy.py --handlers-from /tmp/elsewhere
+```
+
+Output:
+```text
+=== Phantom Runtime v0.1.1 ===
+[OK] Validation passed (3 instruction(s), 0 warning(s))
+Running host program under policy rules.
+
+--- Phantom Diagnostics ---
+[ERROR] Failed to resolve handler 'hooks.on_start' for event 'phantom.pre_execute': handler 'hooks.on_start' is not allowed by the handler policy (module at docs\examples\hooks.py); it was not imported
+```
+
 ## Next
 
 [LANGUAGE_GUIDE.md](LANGUAGE_GUIDE.md) · [ENCODINGS.md](ENCODINGS.md) · [RUNTIME.md](RUNTIME.md) · [GENERATOR.md](GENERATOR.md)

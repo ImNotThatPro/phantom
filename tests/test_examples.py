@@ -33,14 +33,14 @@ def _python(path: Path) -> subprocess.CompletedProcess:
     )
 
 
-@pytest.mark.parametrize("name", ["hello", "comments", "whitespace", "unicode", "hybrid", "events"])
+@pytest.mark.parametrize("name", ["hello", "comments", "whitespace", "unicode", "hybrid", "events", "policy"])
 def test_plain_python_runs_every_example(name):
     result = _python(EXAMPLES / f"{name}.py")
     assert result.returncode == 0, result.stderr
 
 
 @pytest.mark.parametrize(
-    "name", ["hello", "comments", "whitespace", "unicode", "hybrid", "events"]
+    "name", ["hello", "comments", "whitespace", "unicode", "hybrid", "events", "policy"]
 )
 def test_examples_check_clean_even_in_strict_mode(name):
     result = _phantom("check", "--strict", f"docs/examples/{name}.py")
@@ -169,3 +169,25 @@ def test_host_only_diff_is_read_only(tmp_path):
     assert result.stderr == ""
     assert original.read_text(encoding="utf-8") == host
     assert candidate.read_text(encoding="utf-8") == candidate_text
+
+
+def test_policy_example_security_flags():
+    """Test policy.py with --deny and --handlers-from flags."""
+    # Test inspect with --deny (inspect prints to stdout)
+    inspect_res = _phantom("inspect", "docs/examples/policy.py", "--deny", "cap.counters")
+    assert inspect_res.returncode == 0, inspect_res.stderr
+    assert "BLOCKED (denied: cap.counters)" in inspect_res.stdout
+
+    # Test run with --deny (validation errors go to stderr)
+    deny_res = _phantom("run", "docs/examples/policy.py", "--deny", "cap.counters")
+    assert deny_res.returncode == 2
+    assert "requires cap.counters, which the capability policy denies" in deny_res.stderr
+
+    # Test allowed handlers path
+    allowed_res = _phantom("run", "docs/examples/policy.py", "--handlers-from", "docs/examples")
+    assert allowed_res.returncode == 0, allowed_res.stderr
+    assert "[hook] starting docs/examples/policy.py" in allowed_res.stdout
+
+    # Test blocked handlers path (diagnostics/errors go to stderr)
+    blocked_res = _phantom("run", "docs/examples/policy.py", "--handlers-from", "/tmp/elsewhere")
+    assert "is not allowed by the handler policy" in blocked_res.stdout
