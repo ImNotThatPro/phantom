@@ -7,7 +7,12 @@
 #   PHANTOM_EXCLUDE  space-separated shell patterns of files to skip (matched against the path)
 #   PHANTOM_ARGS     extra arguments for `phantom check`, e.g. "--deny cap.counters"
 # Used by the composite GitHub Action in action.yml; also handy locally and in pre-commit.
+#!/usr/bin/env bash
 set -uo pipefail
+
+# Force UTF-8 encoding across Windows/Linux environments
+export PYTHONIOENCODING=utf-8
+export LC_ALL=C.UTF-8
 
 strict="${PHANTOM_STRICT:-true}"
 exclude="${PHANTOM_EXCLUDE:-}"
