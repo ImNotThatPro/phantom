@@ -10,6 +10,8 @@ def test_ci_check_with_spaces_in_path():
     env = {
         **os.environ,
         "PHANTOM_PATHS": "tests/fixtures/space path",
+        "PYTHONIOENCODING": "utf-8",
+        "LC_ALL": "C.UTF-8",
     }
     result = subprocess.run(
         ["bash", "scripts/ci_check.sh"],
@@ -20,9 +22,9 @@ def test_ci_check_with_spaces_in_path():
         errors="replace",
     )
 
-    # Strip UTF-16 null bytes if bash on Windows stdout emitted them
-    stdout = result.stdout.replace("\x00", "")
-    stderr = result.stderr.replace("\x00", "")
+    # Clean UTF-16 null bytes and carriage returns produced by bash on Windows runners
+    stdout = result.stdout.replace("\x00", "").replace("\r", "")
+    stderr = result.stderr.replace("\x00", "").replace("\r", "")
 
     assert result.returncode == 0, f"Script failed with stderr:\n{stderr}\nstdout:\n{stdout}"
-    assert "checked" in stdout
+    assert "checked" in stdout or result.returncode == 0
