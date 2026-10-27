@@ -1,7 +1,9 @@
 import os
 import shutil
 import subprocess
+
 import pytest
+
 
 @pytest.mark.skipif(shutil.which("bash") is None, reason="bash is required for this test")
 def test_ci_check_with_spaces_in_path():
@@ -17,7 +19,7 @@ def test_ci_check_with_spaces_in_path():
         encoding="utf-8",
         errors="replace",
     )
-    
+
     # Strip UTF-16 null bytes if bash on Windows stdout emitted them
     stdout = result.stdout.replace("\x00", "")
     stderr = result.stderr.replace("\x00", "")
