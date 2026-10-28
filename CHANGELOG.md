@@ -19,6 +19,7 @@ All notable changes to Phantom are documented here. The format follows [Keep a C
 - `validator.py` spelled the bidirectional controls it audits as raw characters; they are now explicit code points, and a test keeps invisible/bidirectional characters out of `src/`, `scripts/` and the workflows.
 - `phantom inspect` prints parse errors in text mode (rendered like `check`) instead of hiding them, and exits 2 on parse errors in both text and `--json` mode (#80).
 - Event handlers are invoked at most once per registration when an event fires, even if they raise `TypeError` or `ValueError`; signature validation no longer retries failing handlers or replaces their original error.
+- Support space-containing paths and multiline YAML inputs in CI checks and GitHub Action (#85)
 
 ### Documentation
 - `docs/CI.md`: using Phantom in CI (the reusable GitHub Action and `scripts/ci_check.sh`) and Phantom's own quality gates.
