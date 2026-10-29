@@ -219,6 +219,13 @@ rules for one session only, start nano with
 The experimental VS Code extension in `editors/vscode` also highlights and
 decodes Phantom instructions; see its README for details.
 
+### Sublime Text
+
+Copy the syntax definition file into your local Sublime Text user packages directory:
+
+```bash
+cp scripts/syntax/Phantom.sublime-syntax ~/.config/sublime-text/Packages/User/
+
 ---
 
 ## Next Steps

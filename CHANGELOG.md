@@ -50,6 +50,7 @@ All notable changes to Phantom are documented here. The format follows [Keep a C
 - Maintainer inbox: a workflow that keeps one issue up to date with CI runs waiting for approval, pull requests without a maintainer response and the size of the beginner-issue pool, and pings the maintainers once per waiting pull request.
 - `meta.license(spdx)` instruction: records an SPDX license identifier as metadata (capability `cap.metadata`).
 - Fish shell completion script (`scripts/completions/phantom.fish`): tab-completes subcommands and flags; install it under `~/.config/fish/completions/` (see `docs/INSTALLATION.md`) (#108).
+- Sublime Text syntax highlighting configuration for the Phantom instruction layer (`scripts/syntax/Phantom.sublime-syntax`), with install instruction in the Editor Support section of `docs/INSTALLATION.md` (#154)
 
 ### Security
 - Instruction lines are matched in linear time: a crafted line (for example `#: phantom:0.1.0 a.b(` followed by a few thousand spaces) used to take minutes to parse because the pattern backtracked cubically (#78).
