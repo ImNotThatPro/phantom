@@ -86,3 +86,30 @@ def test_partial_output_is_kept_on_timeout(tmp_path):
     res = execute_host_program(str(script), timeout=1.0)
     assert res.exit_code == 124
     assert "before" in res.stdout
+
+
+def test_execute_host_program_with_stdin_text(tmp_path):
+    script = tmp_path / "stdin_test.py"
+    script.write_text("print(input())\n")
+
+    res = execute_host_program(str(script), stdin_text="hello\n")
+    assert res.exit_code == 0
+    assert res.stdout.strip() == "hello"
+
+
+def test_execute_host_program_launch_error(tmp_path, monkeypatch):
+    script = tmp_path / "valid.py"
+    script.write_text("print('hello')")
+
+    def fail_to_launch(*args, **kwargs):
+        raise OSError("simulated launch failure")
+
+    monkeypatch.setattr("phantom.host.subprocess.Popen", fail_to_launch)
+
+    res = execute_host_program(str(script))
+
+    assert res.exit_code == 1
+    assert res.stdout == ""
+    assert "Execution error:" in res.stderr
+    assert "simulated launch failure" in res.exception
+    assert res.duration_ms >= 0

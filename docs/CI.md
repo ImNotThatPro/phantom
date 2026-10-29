@@ -68,3 +68,14 @@ If directory paths contain spaces, pass them using YAML multiline strings:
     paths: |
       my project/src
       tests/space dir
+
+### Multiline Paths
+
+If directory paths contain spaces, pass them using YAML multiline strings:
+
+```yaml
+- uses: hayagrivai-labs/phantom@main
+  with:
+    paths: |
+      my project/src
+      tests/space dir

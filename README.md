@@ -1,6 +1,6 @@
 # Phantom
 
-🌐 **Translations:** [हिन्दी](docs/hi/README.md) · [Deutsch](docs/de/QUICKSTART.md)
+🌐 **Translations:** [हिन्दी](docs/hi/README.md) · [Deutsch](docs/de/QUICKSTART.md) · [Español](docs/es/QUICKSTART.md) · [Português (Brasil)](docs/pt-BR/QUICKSTART.md)
 
 [![tests](https://github.com/hayagrivai-labs/phantom/actions/workflows/tests.yml/badge.svg)](https://github.com/hayagrivai-labs/phantom/actions/workflows/tests.yml)
 [![release](https://img.shields.io/github/v/release/hayagrivai-labs/phantom)](https://github.com/hayagrivai-labs/phantom/releases)
@@ -10,6 +10,8 @@
 [![first timers only](https://img.shields.io/badge/first--timers--only-friendly-blue.svg)](https://github.com/hayagrivai-labs/phantom/issues?q=is%3Aissue+is%3Aopen+label%3A%22first-timers-only%22)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![discussions](https://img.shields.io/github/discussions/hayagrivai-labs/phantom)](https://github.com/hayagrivai-labs/phantom/discussions)
+[![GitHub stars](https://img.shields.io/github/stars/hayagrivai-labs/phantom?style=social)](https://github.com/hayagrivai-labs/phantom/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/hayagrivai-labs/phantom?style=social)](https://github.com/hayagrivai-labs/phantom/network/members)
 
 > **Contributors welcome.** New here? Pick a [good first issue](https://github.com/hayagrivai-labs/phantom/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22), read the [Contributor Guide](docs/CONTRIBUTOR_GUIDE.md), and say hello in [Discussions](https://github.com/hayagrivai-labs/phantom/discussions). Adding a new instruction takes four code edits. Issues labelled `mentor available` come with maintainer help. [Open in a Codespace](https://codespaces.new/hayagrivai-labs/phantom) for a ready-to-go environment.
 
@@ -166,6 +168,16 @@ Contributions of every size are welcome: bug fixes, tests, docs, new instruction
 <a href="https://github.com/hayagrivai-labs/phantom/graphs/contributors"><img src="https://contrib.rocks/image?repo=hayagrivai-labs/phantom" alt="Contributors"></a>
 
 Everyone who has a pull request merged is thanked in the release notes.
+
+### Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=hayagrivai-labs/phantom&type=Date)](https://star-history.com/#hayagrivai-labs/phantom&Date)
+
+---
+
+### ⭐ Support Phantom
+
+If you find this project interesting, please consider **starring the repository ⭐** and sharing it! It helps other developers discover dual-layer programming.
 
 ## Documentation
 
