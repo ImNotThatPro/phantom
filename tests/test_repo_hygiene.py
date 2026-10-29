@@ -168,6 +168,57 @@ def test_nano_syntax_prefix_is_anchored_to_phantom_comments():
         )
 
 
+# Sublime text syntax highlighting test
+# Check that scripts/syntax/Phantom.sublime-syntax exists and
+# covers all keywords and markers (mirrored from nano test)
+SUBLIME_SYNTAX = ROOT / "scripts" / "syntax" / "Phantom.sublime-syntax"
+PHANTOM_SUBLIME_INSTRUCTIONS = (
+    "event.declare",
+    "event.on",
+    "diagnostic.note",
+    "diagnostic.warn",
+    "counter.create",
+    "counter.increment",
+    "counter.decrement",
+    "counter.reset",
+    "meta.author",
+    "meta.version",
+    "meta.license",
+    "meta.tags",
+)
+PHANTOM_SUBLIME_MARKERS = (
+    "#:ws:begin",
+    "#:ws:end",
+    "#:zw:begin",
+    "#:zw:end",
+    "#:phantom:hybrid",
+)
+
+
+def test_sublime_syntax_highlights_phantom_instructions():
+    assert SUBLIME_SYNTAX.is_file(), "scripts/syntax/Phantom.sublime-syntax is missing"
+    text = SUBLIME_SYNTAX.read_text(encoding="utf-8")
+    assert "%YAML 1.2" in text, "Phantom.sublime-syntax must use %YAML 1.2 format"
+    assert "#: phantom:[0-9]" in text, (
+        "Phantom.sublime-syntax must highlight the #: phantom:<version> prefix"
+    )
+    for instruction in PHANTOM_SUBLIME_INSTRUCTIONS:
+        escaped = instruction.replace(".", r"\.")
+        assert escaped in text, f"Phantom.sublime-syntax does not highlight {instruction}"
+    for marker in PHANTOM_SUBLIME_MARKERS:
+        assert marker in text, f"Phantom.sublime-syntax does not highlight the {marker} marker"
+
+
+def test_sublime_syntax_prefix_is_anchored_to_phantom_comments():
+    text = SUBLIME_SYNTAX.read_text(encoding="utf-8")
+    prefix_rules = [line for line in text.splitlines() if "phantom:[0-9]" in line]
+    assert prefix_rules, "Phantom.sublime-syntax has no Phantom version-prefix rule"
+    for rule in prefix_rules:
+        assert "#: phantom:" in rule, (
+            "the Phantom prefix rule must be anchored to a '#:' comment"
+        )
+
+
 PRE_COMMIT_HOOKS = ROOT / ".pre-commit-hooks.yaml"
 
 
