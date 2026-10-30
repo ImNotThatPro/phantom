@@ -225,6 +225,7 @@ Copy the syntax definition file into your local Sublime Text user packages direc
 
 ```bash
 cp scripts/syntax/Phantom.sublime-syntax ~/.config/sublime-text/Packages/User/
+```
 
 ---
 
