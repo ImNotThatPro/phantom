@@ -210,6 +210,8 @@ class WhitespaceDecoder:
                 lines.append(line)
         if not found_block:
             raise ValueError("No whitespace block start marker found")
+        if in_block:
+            raise ValueError("Unterminated whitespace block: missing end marker")
         return cls.decode(lines)
 
 
@@ -325,6 +327,8 @@ class UnicodeDecoder:
                         collected.append(ch)
         if not found_block:
             raise ValueError("No zero-width block start marker found")
+        if in_block:
+            raise ValueError("Unterminated zero-width block: missing end marker")
         return cls.decode("".join(collected), strict=strict)
 
 
@@ -436,23 +440,20 @@ class HybridCodec:
             if match:
                 comment_instructions.append(CommentDecoder.decode(line))
 
-        # Apply precedence: comment > whitespace > Unicode
-        seen: set[str] = set()
-        results: list[str] = []
-
-        for item in comment_instructions:
-            if item not in seen:
-                seen.add(item)
-                results.append(item)
+        # Apply precedence: comment > whitespace > Unicode.
+        # Filter duplicate instructions from lower-precedence encodings,
+        # while preserving repeated instructions within the same encoding layer.
+        results: list[str] = list(comment_instructions)
+        higher_seen: set[str] = set(comment_instructions)
 
         for item in ws_instructions:
-            if item not in seen:
-                seen.add(item)
+            if item not in higher_seen:
                 results.append(item)
 
+        higher_seen.update(ws_instructions)
+
         for item in zw_instructions:
-            if item not in seen:
-                seen.add(item)
+            if item not in higher_seen:
                 results.append(item)
 
         return results

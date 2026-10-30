@@ -53,16 +53,16 @@ class SourceMap:
         self, line: int, file: str | None = None
     ) -> int | None:
         """Convert an original line number to a transformed line number."""
-        if file is not None and (file, line) in self._orig_to_trans:
-            return self._orig_to_trans[(file, line)]
+        if file is not None:
+            return self._orig_to_trans.get((file, line))
         return self._default_orig_to_trans.get(line)
 
     def transformed_to_original(
         self, line: int, file: str | None = None
     ) -> int | None:
         """Convert a transformed line number to an original line number."""
-        if file is not None and (file, line) in self._trans_to_orig:
-            return self._trans_to_orig[(file, line)]
+        if file is not None:
+            return self._trans_to_orig.get((file, line))
         return self._default_trans_to_orig.get(line)
 
     @classmethod

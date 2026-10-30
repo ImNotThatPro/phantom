@@ -140,6 +140,17 @@ INSTRUCTION_REGISTRY: dict[str, InstructionSpec] = {
         ),
         description="Increment a bounded counter by one.",
     ),
+    "counter.decrement": InstructionSpec(
+        type=InstructionType.COUNTER_DECREMENT,
+        arguments=(
+            ArgumentSpec(
+                "name",
+                ArgumentType.STRING,
+                description="Counter identifier to decrement",
+            ),
+        ),
+        description="Decrement a bounded counter by one.",
+    ),
     "counter.reset": InstructionSpec(
         type=InstructionType.COUNTER_RESET,
         arguments=(

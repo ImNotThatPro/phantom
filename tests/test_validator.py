@@ -96,6 +96,20 @@ class TestValidator:
         prog = parse('#: phantom:0.1.0 counter.reset("ghost")\n')
         assert any("reset before it is created" in e.message for e in validate(prog))
 
+    def test_counter_decrement_valid(self):
+        prog = parse(
+            '#: phantom:0.1.0 counter.create("c", 2)\n'
+            '#: phantom:0.1.0 counter.increment("c")\n'
+            '#: phantom:0.1.0 counter.decrement("c")\n'
+        )
+        assert not prog.has_errors
+        assert len(prog.instructions) == 3
+        assert validate(prog) == []
+
+    def test_counter_decrement_before_create_is_error(self):
+        prog = parse('#: phantom:0.1.0 counter.decrement("ghost")\n')
+        assert any("decremented before it is created" in e.message for e in validate(prog))
+
     def test_counter_reset_restarts_limit_count(self):
         # After a reset the counter is back at 0, so one more increment
         # against a limit of 1 must not warn as an overflow.

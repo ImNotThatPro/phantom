@@ -166,6 +166,15 @@ class PhantomRuntime:
                     else:
                         self.increment_counter(name)
 
+                elif inst.type == InstructionType.COUNTER_DECREMENT:
+                    name = inst.get_string_arg(0)
+                    if not name:
+                        errors.append(
+                            RuntimeError("counter.decrement requires a counter name argument")
+                        )
+                    else:
+                        self.decrement_counter(name)
+
                 elif inst.type == InstructionType.COUNTER_RESET:
                     name = inst.get_string_arg(0)
                     if not name:
@@ -223,18 +232,28 @@ class PhantomRuntime:
         import os
 
         host_dir = os.path.dirname(os.path.abspath(host_file))
+        orig_sys_path = list(sys.path)
+        inserted = False
         if host_dir not in sys.path:
             sys.path.insert(0, host_dir)
+            inserted = True
 
-        # Fire pre-execute lifecycle event
-        self.fire_event("phantom.pre_execute", host_file=host_file, args=args or [])
+        try:
+            # Fire pre-execute lifecycle event
+            self.fire_event("phantom.pre_execute", host_file=host_file, args=args or [])
 
-        result = execute_host_program(host_file, args=args, timeout=timeout)
+            result = execute_host_program(host_file, args=args, timeout=timeout)
 
-        # Fire post-execute lifecycle event
-        self.fire_event("phantom.post_execute", host_file=host_file, result=result)
+            # Fire post-execute lifecycle event
+            self.fire_event("phantom.post_execute", host_file=host_file, result=result)
 
-        return result
+            return result
+        finally:
+            if inserted:
+                try:
+                    sys.path.remove(host_dir)
+                except ValueError:
+                    sys.path[:] = orig_sys_path
 
     def shutdown(self) -> None:
         """Fire phantom.shutdown event, clean up resources."""
@@ -408,6 +427,26 @@ class PhantomRuntime:
             return limit
 
         new_val = current + 1
+        self._counters[name] = (new_val, limit)
+        return new_val
+
+    def decrement_counter(self, name: str) -> int:
+        """Decrement a bounded counter by one, returning the new value.
+
+        If decrementing would go below 0, a diagnostic is recorded and the
+        counter remains at 0.
+        """
+        self._capabilities.require(Capability.COUNTERS)
+        if name not in self._counters:
+            raise RuntimeError(f"Counter '{name}' does not exist")
+
+        current, limit = self._counters[name]
+        if current <= 0:
+            msg = f"RuntimeError: Counter '{name}' decremented below 0"
+            self.add_diagnostic(msg, severity=Severity.WARNING)
+            return 0
+
+        new_val = current - 1
         self._counters[name] = (new_val, limit)
         return new_val
 

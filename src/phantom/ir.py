@@ -21,6 +21,7 @@ class InstructionType(Enum):
     DIAGNOSTIC_WARN = "diagnostic.warn"
     COUNTER_CREATE = "counter.create"
     COUNTER_INCREMENT = "counter.increment"
+    COUNTER_DECREMENT = "counter.decrement"
     COUNTER_RESET = "counter.reset"
     META_AUTHOR = "meta.author"
     META_VERSION = "meta.version"

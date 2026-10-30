@@ -67,6 +67,7 @@ Rules:
 | `diagnostic.warn` | `message: string` | `cap.diagnostics` | Executable |
 | `counter.create` | `name: string`, `limit: integer` | `cap.counters` | Executable |
 | `counter.increment` | `name: string` | `cap.counters` | Executable |
+| `counter.decrement` | `name: string` | `cap.counters` | Executable |
 | `counter.reset` | `name: string` | `cap.counters` | Executable |
 | `meta.author` | `name: string` | `cap.metadata` | Metadata only |
 | `meta.license` | `spdx: string` | `cap.metadata` | Metadata only |
@@ -92,6 +93,9 @@ Creates a counter at 0 with an upper bound. **Validation (errors):** `limit > 0`
 
 ### 5.6 `counter.increment(name)`
 Increments by one. **Validation:** the counter **MUST** have been created earlier in the file (error); more `counter.increment` instructions than the counter's limit is a *warning*. **Runtime:** incrementing past the limit records an error diagnostic and leaves the counter at its limit; it does not abort the program.
+
+### 5.7 `counter.decrement(name)`
+Decrements by one. **Validation:** the counter **MUST** have been created earlier in the file (error). **Runtime:** decrementing below 0 records a warning diagnostic and leaves the counter at 0; it does not abort the program.
 
 ### 5.7 `counter.reset(name)`
 Resets a previously created bounded counter to 0, keeping its limit unchanged. **Validation:** the counter **MUST** have been created earlier in the file (error); increments counted against the limit restart from the reset, so increments after a reset are warned about only if they again exceed the limit. **Runtime:** resetting a counter that does not exist raises a runtime error that is reported, not fatal.

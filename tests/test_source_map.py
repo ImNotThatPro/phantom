@@ -26,6 +26,21 @@ def test_source_map_basic():
     assert sm.transformed_to_original(7, file="a.py") is None
 
 
+def test_source_map_explicit_file_does_not_fall_back_to_unrelated_default():
+    sm = SourceMap()
+    sm.add_mapping(1, 10, file="a.py")
+    sm.add_mapping(2, 20, file="b.py")
+    # Querying a file that has no mapping for line 1 should return None, NOT a's mapping
+    assert sm.original_to_transformed(1, file="b.py") is None
+    assert sm.transformed_to_original(10, file="b.py") is None
+    # Querying nonexistent file returns None
+    assert sm.original_to_transformed(1, file="nonexistent.py") is None
+    assert sm.transformed_to_original(10, file="nonexistent.py") is None
+    # Omitting file falls back to default mapping
+    assert sm.original_to_transformed(1) == 10
+    assert sm.original_to_transformed(2) == 20
+
+
 def test_source_map_default_lookup():
     sm = SourceMap()
     sm.add_mapping(10, 20)

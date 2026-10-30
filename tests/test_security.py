@@ -189,6 +189,24 @@ class TestStrictAudit:
         src = "#:zw:begin\n# ​⁠\n#:zw:end\n"
         assert [f.message for f in audit_source(src)][0].startswith("Unexpected invisible code point U+2060")
 
+    def test_unclosed_zw_block_reported_at_eof(self):
+        from phantom.validator import audit_source
+
+        src = "#:zw:begin\nx = 1\n# rogue \u200b\n"
+        findings = audit_source(src, "unclosed.py")
+        assert len(findings) == 1
+        assert "Unterminated zero-width block missing closing marker '#:zw:end'" in findings[0].message
+        assert findings[0].source.line == 1
+
+    def test_unexpected_closing_zw_marker_reported(self):
+        from phantom.validator import audit_source
+
+        src = "x = 1\n#:zw:end\ny = 2\n"
+        findings = audit_source(src, "stray_close.py")
+        assert len(findings) == 1
+        assert "Unexpected zero-width block closing marker '#:zw:end' without preceding begin marker" in findings[0].message
+        assert findings[0].source.line == 2
+
     def test_cli_strict_exit_codes(self, tmp_path, capsys):
         bad = tmp_path / "bad.py"
         bad.write_text("x = 1  # ‮\n", encoding="utf-8")

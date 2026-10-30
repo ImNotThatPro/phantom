@@ -80,7 +80,14 @@ def format_diff_colored(diff_text: str, colored: bool = True) -> str:
         return diff_text
     out: list[str] = []
     for line in diff_text.splitlines(keepends=True):
-        body, newline = (line[:-1], "\n") if line.endswith("\n") else (line, "")
+        if line.endswith("\r\n"):
+            body, newline = line[:-2], "\r\n"
+        elif line.endswith("\n"):
+            body, newline = line[:-1], "\n"
+        elif line.endswith("\r"):
+            body, newline = line[:-1], "\r"
+        else:
+            body, newline = line, ""
         if body.startswith("+"):
             code = _ADD
         elif body.startswith("-"):

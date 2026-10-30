@@ -132,6 +132,14 @@ class TestFormatDiffColored:
         assert " print('same')" in out
         assert "\033[36m print('same')" not in out
 
+    def test_crlf_diff_places_reset_before_crlf(self):
+        crlf_diff = self.DIFF.replace("\n", "\r\n")
+        out = format_diff_colored(crlf_diff)
+        assert "\033[31m-print('hello')\033[0m\r\n" in out
+        assert "\033[32m+print('world')\033[0m\r\n" in out
+        assert "\033[36m@@ -1 +1 @@\033[0m\r\n" in out
+        assert "\r\033[0m" not in out
+
     def test_uncolored_returns_diff_text_unchanged(self):
         assert format_diff_colored(self.DIFF, colored=False) == self.DIFF
 

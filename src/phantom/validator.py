@@ -109,6 +109,13 @@ def validate(program: PhantomProgram) -> list[ValidationError]:
                         Severity.WARNING,
                     )
 
+        elif inst.type == InstructionType.COUNTER_DECREMENT:
+            name = inst.get_string_arg(0) or ""
+            if name not in counters:
+                add(f"Counter '{name}' decremented before it is created", inst)
+            else:
+                increments[name] = max(0, increments.get(name, 0) - 1)
+
         elif inst.type == InstructionType.COUNTER_RESET:
             name = inst.get_string_arg(0) or ""
             if name not in counters:
@@ -165,14 +172,24 @@ def audit_source(source: str, filename: str = "<string>") -> list[ValidationErro
 
     findings: list[ValidationError] = []
     in_zw = False
+    zw_begin_lineno: int | None = None
     audited_separators = "\x85\u2028\u2029"
     for lineno, line in enumerate(split_physical_lines(source), start=1):
         stripped = line.strip()
         if stripped == ZW_BEGIN_MARKER:
             in_zw = True
+            zw_begin_lineno = lineno
             continue
         if stripped == ZW_END_MARKER:
+            if not in_zw:
+                findings.append(
+                    ValidationError(
+                        f"Unexpected zero-width block closing marker '{ZW_END_MARKER}' without preceding begin marker",
+                        source=SourceLocation(filename, lineno, 0, EncodingMode.UNICODE),
+                    )
+                )
             in_zw = False
+            zw_begin_lineno = None
             continue
         for col, ch in enumerate(line):
             if ch in audited_separators:
@@ -193,6 +210,13 @@ def audit_source(source: str, filename: str = "<string>") -> list[ValidationErro
                         source=SourceLocation(filename, lineno, col, EncodingMode.UNICODE),
                     )
                 )
+    if in_zw:
+        findings.append(
+            ValidationError(
+                f"Unterminated zero-width block missing closing marker '{ZW_END_MARKER}'",
+                source=SourceLocation(filename, zw_begin_lineno or 1, 0, EncodingMode.UNICODE),
+            )
+        )
     return findings
 
 

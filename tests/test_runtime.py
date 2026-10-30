@@ -261,6 +261,40 @@ def test_runtime_reset_counter():
         runtime.reset_counter("ghost")
 
 
+def test_runtime_decrement_counter():
+    runtime = PhantomRuntime()
+    runtime.create_counter("tasks", 5)
+    runtime.increment_counter("tasks")
+    runtime.increment_counter("tasks")
+    assert runtime.get_counter("tasks") == (2, 5)
+
+    assert runtime.decrement_counter("tasks") == 1
+    assert runtime.decrement_counter("tasks") == 0
+    # Bounded at 0: diagnostic recorded, stays at 0
+    assert runtime.decrement_counter("tasks") == 0
+    assert runtime.get_counter("tasks") == (0, 5)
+
+    diags = runtime.get_diagnostics()
+    assert any("decremented below 0" in d.message for d in diags)
+
+    with pytest.raises(RuntimeError):
+        runtime.decrement_counter("ghost")
+
+
+def test_runtime_initialize_counter_decrement():
+    from phantom.parser import parse
+
+    runtime = PhantomRuntime()
+    program = parse("""
+#: phantom:0.1.0 counter.create("c", 10)
+#: phantom:0.1.0 counter.increment("c")
+#: phantom:0.1.0 counter.increment("c")
+#: phantom:0.1.0 counter.decrement("c")
+""")
+    runtime.initialize(program)
+    assert runtime.get_counter("c") == (1, 10)
+
+
 def test_runtime_initialize_counter_reset():
     runtime = PhantomRuntime()
 
@@ -663,3 +697,17 @@ def test_runtime_execute_host_timeout(tmp_path):
     res = runtime.execute_host(str(script), timeout=0.2)
     assert res.exit_code == 124
     assert "timed out" in res.stderr.lower()
+
+
+def test_runtime_execute_host_restores_sys_path(tmp_path):
+    sub = tmp_path / "custom_host_dir"
+    sub.mkdir()
+    script = sub / "test_prog.py"
+    script.write_text("print('hello')\n")
+    runtime = PhantomRuntime()
+    orig_path = list(sys.path)
+    assert str(sub) not in sys.path
+    res = runtime.execute_host(str(script))
+    assert res.exit_code == 0
+    assert str(sub) not in sys.path
+    assert sys.path == orig_path
